@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- htmlaunch:enhanced:v2 -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2264%22%20height%3D%2264%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22hsl(44%2C72%25%2C58%25)%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22hsl(74%2C72%25%2C44%25)%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22url(%23g)%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2246%22%20text-anchor%3D%22middle%22%20font-family%3D%22ui-sans-serif%2Csystem-ui%2C-apple-system%2CSegoe%20UI%2Csans-serif%22%20font-size%3D%2238%22%20font-weight%3D%22800%22%20fill%3D%22%23ffffff%22%3EN%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="theme-color" content="#147b23">
+<meta name="description" content="Neon Dash | deployed with HTMLaunch">
+<link rel="canonical" href="https://vaibhav80393-rgb.github.io/neon-dash/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Neon Dash">
+<meta property="og:title" content="Neon Dash">
+<meta property="og:description" content="Neon Dash | deployed with HTMLaunch">
+<meta property="og:url" content="https://vaibhav80393-rgb.github.io/neon-dash/">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fvaibhav80393-rgb.github.io%2Fneon-dash%2F?w=1200&h=630">
+<meta property="og:image:alt" content="Neon Dash">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Neon Dash">
+<meta name="twitter:description" content="Neon Dash | deployed with HTMLaunch">
+<meta name="twitter:image" content="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fvaibhav80393-rgb.github.io%2Fneon-dash%2F?w=1200&h=630">
+<meta name="twitter:image:alt" content="Neon Dash">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Neon Dash</title>
+<style>
+body{margin:0;background:#090b11;color:#fff;font-family:Arial,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh}
+.wrap{width:min(720px,96vw)} h1{text-align:center;margin:8px 0;font-size:24px}
+.hud{display:flex;justify-content:space-between;background:#151a25;padding:10px;border-radius:10px 10px 0 0;font-weight:bold}
+canvas{display:block;width:100%;background:#11151f;border:1px solid #2a3345;box-sizing:border-box}
+.controls{display:flex;gap:8px;padding:10px;background:#151a25;border-radius:0 0 10px 10px}
+button{flex:1;padding:12px;border:0;border-radius:8px;background:#283247;color:white;font-weight:bold;cursor:pointer}
+#status{text-align:center;color:#b9c4d8;font-size:13px;padding:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>NEON DASH</h1>
+<div class="hud"><span id="level">Level 1</span><span id="score">Score: 0</span><span id="coins">Coins: 0</span></div>
+<canvas id="game" width="720" height="360"></canvas>
+<div class="controls"><button id="jump">JUMP</button><button id="restart">RESTART</button><button id="next">NEXT LEVEL</button></div>
+<div id="status">Space / ↑ / W / click to jump. Avoid spikes and collect coins.</div>
+</div>
+<script>
+const c=document.getElementById("game"),x=c.getContext("2d"),W=720,H=360,G=292;
+let level=0,score=0,coins=0,scroll=0,running=true,dead=false,won=false,last=0;
+const p={x:110,y:G-30,w:30,h:30,vy:0,on:true};
+const maps=[
+{speed:235,a:[[390,"s"],[540,"s"],[690,"c"],[820,"s2"],[1010,"s"],[1150,"c"],[1290,"s"],[1430,"s2"],[1600,"c"],[1740,"s"]]},
+{speed:255,a:[[350,"s"],[470,"s2"],[620,"c"],[760,"s"],[900,"s2"],[1080,"c"],[1210,"s"],[1350,"s"],[1490,"c"],[1640,"s2"],[1810,"s"]]},
+{speed:275,a:[[330,"s2"],[450,"c"],[570,"s"],[710,"s2"],[850,"s"],[990,"c"],[1130,"s2"],[1280,"s"],[1410,"c"],[1560,"s2"],[1720,"s"],[1880,"s2"]]}
+];
+function reset(){scroll=0;running=true;dead=false;won=false;p.y=G-p.h;p.vy=0;p.on=true;maps[level].a.forEach(i=>i.used=false);msg("Space / ↑ / W / click to jump. Avoid spikes and collect coins.");hud()}
+function hud(){document.getElementById("level").textContent="Level "+(level+1);document.getElementById("score").textContent="Score: "+Math.floor(score);document.getElementById("coins").textContent="Coins: "+coins}
+function msg(t){document.getElementById("status").textContent=t}
+function jump(){if(running&&p.on){p.vy=-525;p.on=false}}
+function hit(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
+function die(){dead=true;running=false;msg("CRASH! Press RESTART or Space.")}
+function update(dt){
+ if(!running)return;
+ scroll+=maps[level].speed*dt; score+=maps[level].speed*dt/10;
+ p.vy+=1250*dt;p.y+=p.vy*dt;
+ if(p.y+p.h>=G){p.y=G-p.h;p.vy=0;p.on=true}
+ for(const it of maps[level].a){
+  let q=it[0]-scroll;
+  if(it.used||q<-60||q>W+60)continue;
+  if(it[1]=="c"){
+   if(hit(p,{x:q,y:G-63,w:26,h:26})){it.used=true;coins++;score+=100}
+  }else{
+   let w=it[1]=="s2"?52:28,h=it[1]=="s2"?42:32;
+   if(hit(p,{x:q+3,y:G-h,w:w-6,h:h})){die();break}
+  }
+ }
+ if(scroll>maps[level].a[maps[level].a.length-1][0]+300){won=true;running=false;msg("LEVEL COMPLETE! Press NEXT LEVEL.")}
+ hud()
+}
+function draw(){
+ x.clearRect(0,0,W,H);
+ let g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,"#171d30");g.addColorStop(1,"#090b11");x.fillStyle=g;x.fillRect(0,0,W,H);
+ x.strokeStyle="#273147";for(let i=-(scroll%40);i<W;i+=40){x.beginPath();x.moveTo(i,0);x.lineTo(i,H);x.stroke()}
+ x.fillStyle="#171d29";x.fillRect(0,G,W,H-G);x.fillStyle="#5ee7ff";x.fillRect(0,G,W,4);
+ for(const it of maps[level].a){let q=it[0]-scroll;if(q<-60||q>W+60)continue;
+  if(it[1]=="c"){x.beginPath();x.arc(q+13,G-52,11,0,Math.PI*2);x.fillStyle="#ffd84d";x.fill();x.strokeStyle="#fff";x.stroke()}
+  else{x.beginPath();let w=it[1]=="s2"?52:28;x.moveTo(q,G);x.lineTo(q+w/2,G-(it[1]=="s2"?42:32));x.lineTo(q+w,G);x.closePath();x.fillStyle="#ff4d78";x.fill()}
+ }
+ x.fillStyle="#7cf7ff";x.fillRect(p.x,p.y,p.w,p.h);x.strokeStyle="#fff";x.strokeRect(p.x,p.y,p.w,p.h);
+ x.fillStyle="#111827";x.fillRect(p.x+7,p.y+7,5,5);x.fillRect(p.x+18,p.y+7,5,5);
+ if(dead||won){x.fillStyle="rgba(0,0,0,.6)";x.fillRect(0,0,W,H);x.textAlign="center";x.fillStyle="#fff";x.font="bold 34px Arial";x.fillText(won?"LEVEL COMPLETE!":"CRASH!",W/2,150);x.font="bold 18px Arial";x.fillText(won?"Press NEXT LEVEL":"Press RESTART",W/2,185);x.textAlign="left"}
+}
+function loop(t){let dt=Math.min(.033,(t-last)/1000||0);last=t;update(dt);draw();requestAnimationFrame(loop)}
+document.getElementById("jump").onclick=jump;
+document.getElementById("restart").onclick=()=>{if(dead||won){reset()}else{level=0;score=0;coins=0;reset()}};
+document.getElementById("next").onclick=()=>{if(won){if(level<maps.length-1){level++;reset()}else{msg("ALL 3 LEVELS COMPLETE! Press RESTART to play again.");won=false;running=false}}};
+c.onclick=jump;
+document.addEventListener("keydown",e=>{if(["Space","ArrowUp","KeyW"].includes(e.code)){e.preventDefault();dead?reset():jump()}if(e.code=="KeyR"){level=0;score=0;coins=0;reset()}});
+reset();requestAnimationFrame(loop);
+</script>
+</body>
+</html>
